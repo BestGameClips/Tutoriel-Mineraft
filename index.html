@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MineTutorials — Tous les tutoriels Minecraft Java &amp; Bedrock</title>
+<meta name="description" content="MineTutorials rassemble tous les tutoriels Minecraft Java et Bedrock : comptes, mods, serveurs, plugins, optimisation et développement.">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================================
+   MINETUTORIALS — FEUILLE DE STYLE PRINCIPALE
+   Sommaire :
+   1. Variables & reset
+   2. Fond animé, halo & bulles
+   3. Loader
+   4. Barre de navigation
+   5. Hero
+   6. Recherche
+   7. Catégories / Filtres
+   8. Grille de tutoriels & cartes
+   9. Modale de lecture de tutoriel
+   10. Notifications toast
+   11. Bouton retour en haut
+   12. Footer
+   13. Animations & reveal au scroll
+   14. Responsive
+   ========================================================================= */
+
+/* --------------------------- 1. VARIABLES & RESET --------------------------- */
+:root{
+  --emerald: #22c55e;
+  --emerald-light: #4ade80;
+  --night: #0f172a;
+  --deep-black: #050816;
+  --glass: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-strong: rgba(255,255,255,0.1);
+  --text-main: #eefaf2;
+  --text-muted: rgba(238,250,242,0.62);
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --ease: cubic-bezier(.22,1,.36,1);
+  --shadow-soft: 0 20px 60px -20px rgba(0,0,0,.6);
+}
+
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+
+html{ scroll-behavior:smooth; }
+
+body{
+  font-family:var(--font-body);
+  background:var(--deep-black);
+  color:var(--text-main);
+  overflow-x:hidden;
+  min-height:100vh;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+body.no-scroll{ overflow:hidden; }
+
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+img{ max-width:100%; display:block; }
+::selection{ background:var(--emerald); color:var(--deep-black); }
+
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-track{ background:var(--deep-black); }
+::-webkit-scrollbar-thumb{ background:linear-gradient(var(--emerald), var(--night)); border-radius:10px; }
+
+/* Utility */
+.container{ width:100%; max-width:1240px; margin:0 auto; padding:0 32px; }
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--emerald-light);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.eyebrow::before{
+  content:"";
+  width:6px; height:6px; border-radius:50%;
+  background:var(--emerald);
+  box-shadow:0 0 12px 2px var(--emerald);
+}
+
+.reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s var(--ease), transform .8s var(--ease); }
+.reveal.is-visible{ opacity:1; transform:translateY(0); }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  font-family:var(--font-display); font-weight:600; font-size:.98rem;
+  padding:16px 34px; border-radius:100px;
+  transition:transform .35s var(--ease), box-shadow .35s var(--ease), background .35s var(--ease);
+  white-space:nowrap;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--emerald-light),var(--emerald) 60%, #16a34a);
+  color:#04150a;
+  box-shadow:0 12px 40px -10px rgba(34,197,94,.55), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.btn-primary:hover{ transform:translateY(-3px) scale(1.02); box-shadow:0 20px 50px -12px rgba(34,197,94,.75), inset 0 1px 0 rgba(255,255,255,.5); }
+.btn-primary:active{ transform:translateY(-1px) scale(.99); }
+
+.btn-ghost{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  color:var(--text-main);
+  backdrop-filter:blur(20px);
+}
+.btn-ghost:hover{ background:rgba(255,255,255,.12); transform:translateY(-2px); }
+
+/* --------------------------- 2. FOND ANIMÉ, HALO & BULLES --------------------------- */
+.bg-layer{
+  position:fixed; inset:0; z-index:-3;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(34,197,94,.22), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(74,222,128,.18), transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(15,23,42,.9), transparent 60%),
+    linear-gradient(160deg, var(--deep-black) 0%, var(--night) 45%, #071019 100%);
+  background-size:220% 220%, 200% 200%, 180% 180%, 100% 100%;
+  animation: bgShift 22s ease-in-out infinite alternate;
+}
+@keyframes bgShift{
+  0%{ background-position:0% 0%, 100% 0%, 50% 100%, 0 0; }
+  50%{ background-position:30% 40%, 70% 30%, 40% 70%, 0 0; }
+  100%{ background-position:60% 20%, 40% 60%, 60% 40%, 0 0; }
+}
+
+.grain{
+  position:fixed; inset:0; z-index:-2; opacity:.035; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.cursor-halo{
+  position:fixed;
+  top:0; left:0;
+  width:480px; height:480px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(74,222,128,.16), rgba(34,197,94,.06) 40%, transparent 70%);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  z-index:-1;
+  transition:opacity .4s ease;
+  will-change:transform;
+}
+
+.bubbles{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
+.bubble{
+  position:absolute;
+  bottom:-160px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(74,222,128,.55), rgba(34,197,94,.05) 70%);
+  filter:blur(1px);
+  opacity:.55;
+  animation-name: floatUp;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes floatUp{
+  0%{ transform:translateY(0) translateX(0) scale(1); opacity:0; }
+  10%{ opacity:.6; }
+  50%{ transform:translateY(-55vh) translateX(20px) scale(1.08); }
+  90%{ opacity:.35; }
+  100%{ transform:translateY(-115vh) translateX(-15px) scale(.9); opacity:0; }
+}
+
+/* --------------------------- 3. LOADER --------------------------- */
+.loader{
+  position:fixed; inset:0; z-index:9999;
+  background:var(--deep-black);
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:22px;
+  transition:opacity .6s var(--ease), visibility .6s var(--ease);
+}
+.loader.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+.loader-cube{
+  width:64px; height:64px;
+  position:relative;
+  transform-style:preserve-3d;
+  animation:cubeSpin 2.4s linear infinite;
+}
+.loader-cube span{
+  position:absolute; inset:0;
+  border:2px solid var(--emerald);
+  box-shadow:0 0 24px rgba(34,197,94,.6) inset, 0 0 24px rgba(34,197,94,.4);
+  background:rgba(34,197,94,.08);
+}
+.loader-cube span:nth-child(1){ transform:translateZ(32px); }
+.loader-cube span:nth-child(2){ transform:rotateY(90deg) translateZ(32px); }
+.loader-cube span:nth-child(3){ transform:rotateY(180deg) translateZ(32px); }
+.loader-cube span:nth-child(4){ transform:rotateY(-90deg) translateZ(32px); }
+.loader-cube span:nth-child(5){ transform:rotateX(90deg) translateZ(32px); }
+.loader-cube span:nth-child(6){ transform:rotateX(-90deg) translateZ(32px); }
+@keyframes cubeSpin{
+  0%{ transform:rotateX(-25deg) rotateY(0deg); }
+  100%{ transform:rotateX(-25deg) rotateY(360deg); }
+}
+.loader-text{ font-family:var(--font-mono); font-size:.85rem; letter-spacing:.15em; color:var(--text-muted); text-transform:uppercase; }
+.loader-text span{ color:var(--emerald-light); }
+
+/* --------------------------- 4. NAVIGATION --------------------------- */
+.navbar{
+  position:fixed; top:18px; left:50%; transform:translateX(-50%);
+  z-index:500;
+  width:min(1100px, calc(100% - 32px));
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 22px;
+  background:rgba(15,23,42,.45);
+  border:1px solid var(--glass-border);
+  border-radius:100px;
+  backdrop-filter:blur(24px) saturate(160%);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+  box-shadow:var(--shadow-soft);
+  transition:background .4s ease, top .4s ease;
+}
+.navbar.scrolled{ background:rgba(15,23,42,.72); top:12px; }
+
+.nav-logo{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--font-display); font-weight:700; font-size:1.05rem;
+}
+.nav-logo .mark{
+  width:34px; height:34px; border-radius:10px;
+  background:linear-gradient(135deg,var(--emerald-light),var(--emerald));
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem;
+  box-shadow:0 6px 18px -4px rgba(34,197,94,.7);
+}
+
+.nav-links{ display:flex; align-items:center; gap:28px; }
+.nav-links a{
+  font-size:.9rem; color:var(--text-muted); font-weight:500;
+  transition:color .3s ease; position:relative;
+}
+.nav-links a:hover{ color:var(--text-main); }
+.nav-links a::after{
+  content:""; position:absolute; left:0; bottom:-6px; width:0; height:2px;
+  background:var(--emerald-light); transition:width .3s var(--ease);
+}
+.nav-links a:hover::after{ width:100%; }
+
+.nav-actions{ display:flex; align-items:center; gap:14px; }
+.nav-counter{
+  font-family:var(--font-mono); font-size:.78rem; color:var(--emerald-light);
+  background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3);
+  padding:6px 12px; border-radius:100px;
+}
+.nav-toggle{ display:none; }
+
+@media (max-width:860px){
+  .nav-links{ display:none; }
+}
+
+/* --------------------------- 5. HERO --------------------------- */
+.hero{
+  position:relative;
+  padding:200px 0 140px;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  overflow:hidden;
+}
+.hero-badge{
+  margin-bottom:26px;
+}
+.hero h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(2.6rem, 7vw, 5.2rem);
+  line-height:1.05;
+  letter-spacing:-.02em;
+  max-width:900px;
+}
+.hero h1 .accent{
+  background:linear-gradient(120deg, var(--emerald-light), var(--emerald) 40%, #a7f3d0 70%, var(--emerald-light));
+  background-size:300% auto;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:shine 6s linear infinite;
+}
+@keyframes shine{
+  0%{ background-position:0% 50%; }
+  100%{ background-position:300% 50%; }
+}
+.hero-title-word{ display:inline-block; opacity:0; transform:translateY(30px) rotateX(40deg); animation:wordIn .8s var(--ease) forwards; }
+@keyframes wordIn{ to{ opacity:1; transform:translateY(0) rotateX(0); } }
+
+.hero p.subtitle{
+  margin-top:26px;
+  font-size:clamp(1.05rem, 2vw, 1.3rem);
+  color:var(--text-muted);
+  max-width:620px;
+}
+.hero-ctas{ display:flex; gap:18px; margin-top:44px; flex-wrap:wrap; justify-content:center; }
+
+.hero-stats{
+  margin-top:78px;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+  width:100%; max-width:920px;
+  padding:26px 10px;
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);
+  backdrop-filter:blur(24px);
+}
+.hero-stat{ text-align:center; border-right:1px solid var(--glass-border); }
+.hero-stat:last-child{ border-right:none; }
+.hero-stat .num{ font-family:var(--font-display); font-size:1.9rem; font-weight:700; color:var(--emerald-light); }
+.hero-stat .label{ font-size:.78rem; color:var(--text-muted); margin-top:4px; }
+
+.hero-glow-orb{
+  position:absolute; width:520px; height:520px; border-radius:50%;
+  background:radial-gradient(circle, rgba(74,222,128,.35), transparent 70%);
+  top:-180px; left:50%; transform:translateX(-50%);
+  filter:blur(20px);
+  animation:orbPulse 8s ease-in-out infinite;
+  z-index:-1;
+}
+@keyframes orbPulse{ 0%,100%{ opacity:.55; transform:translateX(-50%) scale(1); } 50%{ opacity:.85; transform:translateX(-50%) scale(1.12); } }
+
+@media (max-width:720px){
+  .hero-stats{ grid-template-columns:repeat(2,1fr); }
+  .hero-stat{ border-bottom:1px solid var(--glass-border); padding-bottom:14px; margin-bottom:10px; }
+  .hero-stat:nth-child(2n){ border-right:none; }
+}
+
+/* --------------------------- 6. RECHERCHE --------------------------- */
+.search-section{ padding:0 0 60px; }
+.search-wrap{
+  max-width:680px; margin:0 auto;
+  position:relative;
+  display:flex; align-items:center; gap:14px;
+  padding:8px 8px 8px 26px;
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:100px;
+  backdrop-filter:blur(24px);
+  box-shadow:var(--shadow-soft);
+  transition:border-color .35s ease, box-shadow .35s ease, transform .35s ease;
+}
+.search-wrap:focus-within{
+  border-color:rgba(74,222,128,.6);
+  box-shadow:0 0 0 4px rgba(34,197,94,.15), var(--shadow-soft);
+  transform:translateY(-2px);
+}
+.search-icon{ font-size:1.15rem; opacity:.7; }
+.search-wrap input{
+  flex:1; background:transparent; border:none; outline:none;
+  color:var(--text-main); font-size:1rem; padding:14px 0;
+  font-family:var(--font-body);
+}
+.search-wrap input::placeholder{ color:var(--text-muted); }
+.search-clear{
+  width:34px; height:34px; border-radius:50%;
+  background:rgba(255,255,255,.08);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transform:scale(.7); transition:all .3s var(--ease);
+  flex-shrink:0;
+}
+.search-clear.show{ opacity:1; transform:scale(1); }
+.search-count-btn{
+  font-family:var(--font-mono); font-size:.78rem; color:var(--emerald-light);
+  padding:12px 20px; border-radius:100px;
+  background:linear-gradient(135deg, rgba(74,222,128,.18), rgba(34,197,94,.08));
+  border:1px solid rgba(74,222,128,.25);
+  white-space:nowrap;
+}
+
+/* --------------------------- 7. CATEGORIES / FILTRES --------------------------- */
+.filters-section{ padding-bottom:56px; }
+.filters{
+  display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
+  max-width:960px; margin:0 auto;
+}
+.filter-chip{
+  display:flex; align-items:center; gap:9px;
+  padding:12px 22px;
+  border-radius:100px;
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  font-size:.9rem; font-weight:500;
+  transition:all .35s var(--ease);
+}
+.filter-chip:hover{ transform:translateY(-2px); background:rgba(255,255,255,.1); }
+.filter-chip.active{
+  background:linear-gradient(135deg,var(--emerald-light),var(--emerald));
+  color:#04150a; font-weight:600;
+  box-shadow:0 10px 30px -8px rgba(34,197,94,.6);
+  border-color:transparent;
+}
+.filter-chip .count{
+  font-family:var(--font-mono); font-size:.72rem;
+  background:rgba(0,0,0,.15); padding:2px 8px; border-radius:20px;
+}
+.filter-chip.active .count{ background:rgba(0,0,0,.2); }
+
+/* --------------------------- 8. GRILLE DE TUTORIELS --------------------------- */
+.tutorials-section{ padding-bottom:120px; }
+.section-heading{ text-align:center; margin-bottom:52px; }
+.section-heading h2{
+  font-family:var(--font-display); font-size:clamp(1.8rem,4vw,2.6rem);
+  margin-top:14px; font-weight:600;
+}
+.section-heading p{ color:var(--text-muted); margin-top:12px; }
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+  gap:26px;
+}
+
+.card{
+  position:relative;
+  padding:30px 28px 28px;
+  border-radius:var(--radius-md);
+  background:linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(18px);
+  overflow:hidden;
+  transition:transform .5s var(--ease), box-shadow .5s var(--ease), border-color .5s ease;
+  display:flex; flex-direction:column; gap:16px;
+}
+.card::before{
+  content:"";
+  position:absolute; inset:0;
+  background:radial-gradient(500px circle at var(--mx,50%) var(--my,0%), rgba(74,222,128,.16), transparent 60%);
+  opacity:0; transition:opacity .4s ease;
+  pointer-events:none;
+}
+.card:hover::before{ opacity:1; }
+.card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(74,222,128,.25);
+  border-color:rgba(74,222,128,.35);
+}
+.card.hide{ display:none; }
+
+.card-icon{
+  width:56px; height:56px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem;
+  background:linear-gradient(135deg, rgba(74,222,128,.25), rgba(34,197,94,.08));
+  border:1px solid rgba(74,222,128,.25);
+}
+.card-cat{
+  font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--emerald-light);
+}
+.card h3{ font-family:var(--font-display); font-size:1.18rem; font-weight:600; line-height:1.35; }
+.card p{ color:var(--text-muted); font-size:.92rem; flex:1; }
+.card-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:6px; }
+.card-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:.86rem; font-weight:600; color:var(--emerald-light);
+  padding:10px 0;
+  transition:gap .3s var(--ease);
+}
+.card-btn:hover{ gap:12px; }
+.card-steps-count{ font-family:var(--font-mono); font-size:.72rem; color:var(--text-muted); }
+
+.no-results{
+  text-align:center; padding:60px 20px; color:var(--text-muted);
+  grid-column:1/-1;
+  display:none;
+}
+.no-results.show{ display:block; }
+.no-results .emoji{ font-size:2.6rem; margin-bottom:14px; }
+
+/* --------------------------- 9. MODALE TUTORIEL --------------------------- */
+.modal-overlay{
+  position:fixed; inset:0; z-index:2000;
+  background:rgba(2,6,15,.72);
+  backdrop-filter:blur(10px);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+  opacity:0; visibility:hidden;
+  transition:opacity .4s var(--ease), visibility .4s var(--ease);
+}
+.modal-overlay.open{ opacity:1; visibility:visible; }
+
+.modal{
+  width:min(680px, 100%);
+  max-height:86vh;
+  display:flex; flex-direction:column;
+  background:linear-gradient(160deg, rgba(15,23,42,.92), rgba(5,8,22,.95));
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(74,222,128,.15);
+  transform:scale(.9) translateY(30px);
+  transition:transform .45s var(--ease);
+  overflow:hidden;
+}
+.modal-overlay.open .modal{ transform:scale(1) translateY(0); }
+
+.modal-header{
+  padding:26px 30px 20px;
+  border-bottom:1px solid var(--glass-border);
+  display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+}
+.modal-header-left{ display:flex; gap:16px; align-items:center; }
+.modal-icon{
+  width:50px; height:50px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(74,222,128,.3), rgba(34,197,94,.1));
+  display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+  border:1px solid rgba(74,222,128,.3);
+  flex-shrink:0;
+}
+.modal-title-group .cat{ font-family:var(--font-mono); font-size:.7rem; color:var(--emerald-light); text-transform:uppercase; letter-spacing:.1em; }
+.modal-title-group h3{ font-family:var(--font-display); font-size:1.25rem; margin-top:4px; }
+.modal-close{
+  width:38px; height:38px; border-radius:50%;
+  background:rgba(255,255,255,.06); border:1px solid var(--glass-border);
+  display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+  transition:all .3s ease; flex-shrink:0;
+}
+.modal-close:hover{ background:rgba(239,68,68,.2); transform:rotate(90deg); }
+
+/* Barre de progression façon "barre d'XP" Minecraft */
+.xp-bar{
+  height:10px; margin:0 30px;
+  margin-top:18px;
+  border-radius:6px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.1);
+  overflow:hidden;
+  position:relative;
+}
+.xp-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg, var(--emerald), var(--emerald-light));
+  box-shadow:0 0 12px rgba(74,222,128,.7);
+  border-radius:6px 0 0 6px;
+  transition:width .5s var(--ease);
+  position:relative;
+}
+.xp-bar-fill::after{
+  content:"";
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 2px, transparent 2px 10px);
+}
+.xp-steps-label{
+  display:flex; justify-content:space-between; margin:10px 30px 0;
+  font-family:var(--font-mono); font-size:.7rem; color:var(--text-muted);
+}
+
+.modal-body{
+  padding:26px 30px 10px;
+  overflow-y:auto;
+  flex:1;
+}
+.step{ display:none; animation:stepIn .45s var(--ease); }
+.step.active{ display:block; }
+@keyframes stepIn{ from{ opacity:0; transform:translateX(16px); } to{ opacity:1; transform:translateX(0); } }
+.step h4{ font-family:var(--font-display); font-size:1.05rem; margin-bottom:12px; color:var(--emerald-light); }
+.step p{ color:rgba(238,250,242,.85); line-height:1.7; font-size:.96rem; }
+.step ul{ margin:14px 0 0 20px; color:rgba(238,250,242,.85); font-size:.94rem; line-height:1.8; }
+.step .tip{
+  margin-top:16px; padding:14px 16px; border-radius:12px;
+  background:rgba(34,197,94,.08); border:1px solid rgba(74,222,128,.25);
+  font-size:.86rem; color:var(--emerald-light);
+}
+
+.modal-footer{
+  padding:20px 30px 28px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  border-top:1px solid var(--glass-border);
+}
+.modal-nav-btn{
+  padding:12px 22px; border-radius:100px;
+  background:var(--glass); border:1px solid var(--glass-border);
+  font-size:.88rem; font-weight:600;
+  transition:all .3s var(--ease);
+  display:flex; align-items:center; gap:8px;
+}
+.modal-nav-btn:hover:not(:disabled){ background:rgba(255,255,255,.12); transform:translateY(-2px); }
+.modal-nav-btn:disabled{ opacity:.35; cursor:not-allowed; }
+.modal-nav-btn.next{
+  background:linear-gradient(135deg,var(--emerald-light),var(--emerald));
+  color:#04150a; border-color:transparent;
+}
+.modal-dots{ display:flex; gap:6px; }
+.modal-dots span{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.2); transition:all .3s ease; }
+.modal-dots span.active{ background:var(--emerald-light); width:18px; border-radius:4px; }
+
+/* --------------------------- 10. TOAST --------------------------- */
+.toast-container{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+  z-index:3000;
+  display:flex; flex-direction:column; gap:10px;
+  align-items:center;
+}
+.toast{
+  display:flex; align-items:center; gap:12px;
+  padding:14px 22px;
+  background:rgba(15,23,42,.9);
+  border:1px solid rgba(74,222,128,.3);
+  border-radius:100px;
+  box-shadow:0 15px 40px -10px rgba(0,0,0,.6);
+  backdrop-filter:blur(18px);
+  font-size:.88rem;
+  opacity:0; transform:translateY(20px) scale(.9);
+  animation:toastIn .4s var(--ease) forwards, toastOut .4s var(--ease) forwards 3.2s;
+}
+@keyframes toastIn{ to{ opacity:1; transform:translateY(0) scale(1); } }
+@keyframes toastOut{ to{ opacity:0; transform:translateY(-14px) scale(.92); } }
+.toast .dot{ width:8px; height:8px; border-radius:50%; background:var(--emerald-light); box-shadow:0 0 10px var(--emerald-light); flex-shrink:0; }
+
+/* --------------------------- 11. RETOUR EN HAUT --------------------------- */
+.to-top{
+  position:fixed; bottom:28px; right:28px; z-index:400;
+  width:52px; height:52px; border-radius:50%;
+  background:var(--glass); border:1px solid var(--glass-border);
+  backdrop-filter:blur(20px);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem;
+  opacity:0; visibility:hidden; transform:translateY(20px);
+  transition:all .4s var(--ease);
+  box-shadow:var(--shadow-soft);
+}
+.to-top.show{ opacity:1; visibility:visible; transform:translateY(0); }
+.to-top:hover{ background:rgba(74,222,128,.2); transform:translateY(-4px); }
+
+/* --------------------------- 12. FOOTER --------------------------- */
+.footer{
+  position:relative;
+  padding:80px 0 34px;
+  border-top:1px solid var(--glass-border);
+  background:linear-gradient(180deg, transparent, rgba(15,23,42,.5));
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:40px;
+  padding-bottom:50px;
+}
+.footer-brand .nav-logo{ margin-bottom:16px; }
+.footer-brand p{ color:var(--text-muted); font-size:.9rem; max-width:280px; }
+.footer-col h4{ font-family:var(--font-display); font-size:.92rem; margin-bottom:18px; }
+.footer-col ul{ list-style:none; display:flex; flex-direction:column; gap:12px; }
+.footer-col a{ color:var(--text-muted); font-size:.88rem; transition:color .3s ease, padding-left .3s ease; }
+.footer-col a:hover{ color:var(--emerald-light); padding-left:4px; }
+
+.social-row{ display:flex; gap:12px; margin-top:6px; }
+.social-btn{
+  width:42px; height:42px; border-radius:12px;
+  background:var(--glass); border:1px solid var(--glass-border);
+  display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+  transition:all .3s var(--ease);
+}
+.social-btn:hover{ background:rgba(74,222,128,.2); transform:translateY(-4px) rotate(-6deg); }
+
+.footer-bottom{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
+  padding-top:28px; border-top:1px solid var(--glass-border);
+  font-size:.82rem; color:var(--text-muted);
+}
+.footer-bottom .made{ display:flex; align-items:center; gap:8px; }
+.footer-bottom .made b{ color:var(--emerald-light); }
+
+@media (max-width:860px){
+  .footer-grid{ grid-template-columns:1fr 1fr; }
+}
+@media (max-width:520px){
+  .footer-grid{ grid-template-columns:1fr; }
+  .footer-bottom{ flex-direction:column; align-items:flex-start; }
+}
+
+/* --------------------------- 14. RESPONSIVE GLOBAL --------------------------- */
+@media (max-width:600px){
+  .container{ padding:0 18px; }
+  .hero{ padding:150px 0 90px; }
+  .hero-ctas{ flex-direction:column; width:100%; }
+  .hero-ctas .btn{ width:100%; }
+  .modal{ max-height:92vh; }
+  .modal-header{ padding:22px 20px 16px; }
+  .xp-bar, .xp-steps-label{ margin-left:20px; margin-right:20px; }
+  .modal-body{ padding:20px 20px 6px; }
+  .modal-footer{ padding:16px 20px 22px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================= LOADER ============================= -->
+<div class="loader" id="loader">
+  <div class="loader-cube"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="loader-text">Chargement de <span>MineTutorials</span>…</div>
+</div>
+
+<!-- ============================= FOND ============================= -->
+<div class="bg-layer"></div>
+<div class="grain"></div>
+<div class="cursor-halo" id="cursorHalo"></div>
+<div class="bubbles" id="bubbles"></div>
+
+<!-- ============================= NAVBAR ============================= -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">
+    <div class="mark">🎮</div>
+    MineTutorials
+  </div>
+  <div class="nav-links">
+    <a href="#accueil">Accueil</a>
+    <a href="#recherche">Recherche</a>
+    <a href="#categories">Catégories</a>
+    <a href="#tutoriels">Tutoriels</a>
+  </div>
+  <div class="nav-actions">
+    <span class="nav-counter"><span id="navCount">16</span> tutoriels</span>
+  </div>
+</nav>
+
+<!-- ============================= HERO ============================= -->
+<header class="hero" id="accueil">
+  <div class="hero-glow-orb"></div>
+  <div class="eyebrow reveal is-visible">JAVA &amp; BEDROCK · GUIDES OFFICIEUX</div>
+  <h1 id="heroTitle" style="margin-top:22px;">
+    <!-- rempli en JS pour l'animation mot par mot -->
+  </h1>
+  <p class="subtitle reveal is-visible">Tous les tutoriels Minecraft Java &amp; Bedrock au même endroit.</p>
+  <div class="hero-ctas reveal is-visible">
+    <a href="#tutoriels" class="btn btn-primary">Explorer les tutoriels →</a>
+    <a href="#categories" class="btn btn-ghost">Voir les catégories</a>
+  </div>
+
+  <div class="hero-stats reveal">
+    <div class="hero-stat"><div class="num" data-count="16">0</div><div class="label">Tutoriels</div></div>
+    <div class="hero-stat"><div class="num" data-count="6">0</div><div class="label">Catégories</div></div>
+    <div class="hero-stat"><div class="num" data-count="2">0</div><div class="label">Éditions couvertes</div></div>
+    <div class="hero-stat"><div class="num" data-count="100">0</div><div class="label">% Gratuit</div></div>
+  </div>
+</header>
+
+<!-- ============================= RECHERCHE ============================= -->
+<section class="search-section" id="recherche">
+  <div class="container">
+    <div class="search-wrap reveal">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Rechercher un tutoriel : « Fabric », « serveur », « pseudo »…" autocomplete="off">
+      <button class="search-clear" id="searchClear" aria-label="Effacer">✕</button>
+      <span class="search-count-btn" id="searchCountBadge">16 résultats</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= CATEGORIES ============================= -->
+<section class="filters-section" id="categories">
+  <div class="container">
+    <div class="filters reveal" id="filters">
+      <button class="filter-chip active" data-filter="all">✨ Tous <span class="count">16</span></button>
+      <button class="filter-chip" data-filter="comptes">🎮 Comptes Minecraft <span class="count">3</span></button>
+      <button class="filter-chip" data-filter="mods">🧩 Mods <span class="count">3</span></button>
+      <button class="filter-chip" data-filter="serveurs">🌍 Serveurs <span class="count">3</span></button>
+      <button class="filter-chip" data-filter="plugins">🔌 Plugins <span class="count">3</span></button>
+      <button class="filter-chip" data-filter="optimisation">🚀 Optimisation FPS <span class="count">2</span></button>
+      <button class="filter-chip" data-filter="developpement">🛠️ Développement <span class="count">2</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= TUTORIELS ============================= -->
+<section class="tutorials-section" id="tutoriels">
+  <div class="container">
+    <div class="section-heading reveal">
+      <div class="eyebrow">BIBLIOTHÈQUE DE GUIDES</div>
+      <h2>Un tutoriel pour chaque situation</h2>
+      <p>Cliquez sur une carte pour ouvrir le guide complet, étape par étape.</p>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="no-results" id="noResults">
+      <div class="emoji">🧱</div>
+      <p>Aucun tutoriel ne correspond à votre recherche.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= MODALE ============================= -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-icon" id="modalIcon">📘</div>
+        <div class="modal-title-group">
+          <div class="cat" id="modalCat">Catégorie</div>
+          <h3 id="modalTitle">Titre du tutoriel</h3>
+        </div>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Fermer">✕</button>
+    </div>
+
+    <div class="xp-bar"><div class="xp-bar-fill" id="xpFill" style="width:0%"></div></div>
+    <div class="xp-steps-label">
+      <span>Étape <span id="stepCurrent">1</span> / <span id="stepTotal">1</span></span>
+      <span id="stepPercent">0%</span>
+    </div>
+
+    <div class="modal-body" id="modalBody"></div>
+
+    <div class="modal-footer">
+      <button class="modal-nav-btn prev" id="prevBtn">← Précédent</button>
+      <div class="modal-dots" id="modalDots"></div>
+      <button class="modal-nav-btn next" id="nextBtn">Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= TOASTS ============================= -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============================= RETOUR EN HAUT ============================= -->
+<button class="to-top" id="toTop" aria-label="Retour en haut">↑</button>
+
+<!-- ============================= FOOTER ============================= -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo"><div class="mark">🎮</div>MineTutorials</div>
+        <p>La bibliothèque de tutoriels Minecraft Java &amp; Bedrock la plus complète : comptes, mods, serveurs, plugins, optimisation et développement.</p>
+        <div class="social-row" style="margin-top:22px;">
+          <a href="#" class="social-btn" title="Discord">💬</a>
+          <a href="#" class="social-btn" title="YouTube">▶️</a>
+          <a href="#" class="social-btn" title="Twitter / X">𝕏</a>
+          <a href="#" class="social-btn" title="GitHub">🐙</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="#accueil">Accueil</a></li>
+          <li><a href="#recherche">Recherche</a></li>
+          <li><a href="#categories">Catégories</a></li>
+          <li><a href="#tutoriels">Tutoriels</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Catégories</h4>
+        <ul>
+          <li><a href="#" data-jump="comptes">Comptes Minecraft</a></li>
+          <li><a href="#" data-jump="mods">Mods</a></li>
+          <li><a href="#" data-jump="serveurs">Serveurs</a></li>
+          <li><a href="#" data-jump="plugins">Plugins</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Ressources</h4>
+        <ul>
+          <li><a href="#">Blog communautaire</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="made">MineTutorials • Créé par <b>BestGameClips</b></div>
+      <div>© <span id="year"></span> MineTutorials. Tous droits réservés.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =========================================================================
+   MINETUTORIALS — SCRIPT PRINCIPAL
+   Sommaire :
+   1. Données des tutoriels
+   2. Rendu des cartes
+   3. Recherche + filtres
+   4. Modale (lecture des tutoriels)
+   5. Fond animé : bulles, halo souris, parallaxe
+   6. Compteurs, scroll reveal, back-to-top
+   7. Notifications toast
+   8. Loader & initialisation
+   ========================================================================= */
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* --------------------------- 1. DONNÉES DES TUTORIELS --------------------------- */
+const CATEGORY_LABELS = {
+  comptes: '🎮 Comptes Minecraft',
+  mods: '🧩 Mods',
+  serveurs: '🌍 Serveurs',
+  plugins: '🔌 Plugins',
+  optimisation: '🚀 Optimisation FPS',
+  developpement: '🛠️ Développement'
+};
+
+const TUTORIALS = [
+  {
+    id: 'pseudo',
+    icon: '🪪',
+    category: 'comptes',
+    title: 'Changer son pseudo Minecraft',
+    desc: "Modifiez votre nom d'affichage Java en toute sécurité, sans perdre vos avancements ni vos statistiques.",
+    steps: [
+      { title: 'Ouvrez votre compte Microsoft', text: "Rendez-vous sur le portail de gestion de compte Microsoft associé à votre licence Minecraft Java, puis connectez-vous avec l'adresse e-mail utilisée lors de l'achat." },
+      { title: 'Accédez au profil Minecraft', text: "Dans la section dédiée au jeu, ouvrez la page de profil Minecraft. C'est ici que votre skin, votre cape et votre pseudo actuel sont affichés." },
+      { title: "Modifiez le champ « Gamertag / Nom d'affichage »", text: "Cliquez sur le bouton d'édition à côté de votre pseudo, saisissez le nouveau nom souhaité, puis validez. Le nom doit respecter les règles de format (3 à 16 caractères, lettres, chiffres et underscore).", list: ['3 à 16 caractères autorisés', 'Uniquement lettres, chiffres et _', 'Le changement est limité dans le temps entre deux modifications'] },
+      { title: 'Patientez le temps de la propagation', text: "Le nouveau pseudo peut mettre quelques minutes à s'afficher en jeu et sur les serveurs multijoueurs, le temps que le cache des serveurs se mette à jour.", tip: "💡 Astuce : votre ancien pseudo devient temporairement réservé, personne ne peut l'utiliser immédiatement après vous." }
+    ]
+  },
+  {
+    id: 'microsoft',
+    icon: '🛠️',
+    category: 'comptes',
+    title: 'Résoudre un problème Microsoft',
+    desc: "Corrigez les erreurs de connexion, d'authentification ou de licence les plus fréquentes sur le launcher.",
+    steps: [
+      { title: 'Identifiez le message d\'erreur', text: "Notez le code ou le texte exact affiché par le launcher (ex : erreur d'authentification, licence introuvable, jeton expiré). Cela permet de cibler la bonne solution." },
+      { title: 'Vérifiez votre connexion et vos identifiants', text: "Déconnectez-vous puis reconnectez-vous à votre compte Microsoft depuis le launcher. Assurez-vous que l'adresse utilisée est bien celle liée à l'achat du jeu." },
+      { title: 'Videz le cache du launcher', text: "Fermez complètement le launcher, supprimez les fichiers de cache/authentification locaux, puis relancez l'application pour forcer une nouvelle authentification propre.", list: ['Fermez le launcher via le gestionnaire de tâches', 'Supprimez le dossier de cache d\'authentification', 'Relancez et reconnectez-vous'] },
+      { title: 'Contactez le support si le problème persiste', text: "Si l'erreur revient après ces étapes, rapprochez-vous du support officiel avec une capture d'écran du message et l'heure exacte de l'incident.", tip: "💡 Astuce : un problème réseau (pare-feu, proxy d'entreprise) est souvent la cause d'une authentification qui échoue en boucle." }
+    ]
+  },
+  {
+    id: 'migration',
+    icon: '🔄',
+    category: 'comptes',
+    title: 'Migrer son compte',
+    desc: "Passez d'un ancien compte Mojang vers un compte Microsoft sans perdre vos achats ni votre skin.",
+    steps: [
+      { title: 'Rassemblez vos informations de connexion', text: "Munissez-vous de l'e-mail et du mot de passe de votre ancien compte, ainsi que d'une adresse Microsoft valide (existante ou à créer) pour recevoir la licence." },
+      { title: 'Lancez la procédure de migration', text: "Depuis la page officielle de connexion, choisissez l'option de migration et suivez les instructions pour lier votre ancien compte au nouveau compte Microsoft." },
+      { title: 'Vérifiez le transfert de vos achats', text: "Une fois la migration terminée, contrôlez que Minecraft Java apparaît bien dans la bibliothèque du compte Microsoft et que votre skin/cape est conservé.", list: ['Licence Java transférée', 'Skin et cape conservés', 'Historique de nom conservé'] },
+      { title: 'Connectez-vous depuis le launcher', text: "Ouvrez le launcher officiel, connectez-vous avec le compte Microsoft, et vérifiez que le jeu se lance normalement avec vos anciens paramètres.", tip: "💡 Astuce : conservez les identifiants de l'ancien compte quelques semaines au cas où une vérification serait demandée." }
+    ]
+  },
+  {
+    id: 'fabric',
+    icon: '🧵',
+    category: 'mods',
+    title: 'Installer Fabric',
+    desc: "Mettez en place le chargeur de mods léger et modulaire, idéal pour les mods récents et l'optimisation.",
+    steps: [
+      { title: 'Téléchargez l\'installateur officiel', text: "Récupérez l'installateur Fabric sur le site officiel du projet, en choisissant la version correspondant à votre installation Java." },
+      { title: 'Sélectionnez la version du jeu', text: "Lancez l'installateur, choisissez la version de Minecraft ciblée ainsi que la version du Fabric Loader, puis validez l'emplacement du profil.", list: ['Choisir la version de Minecraft', 'Choisir la version du Loader', 'Créer le profil dans le launcher'] },
+      { title: 'Installez Fabric API', text: "La plupart des mods Fabric nécessitent la bibliothèque Fabric API : placez le fichier .jar téléchargé dans le dossier « mods » de votre instance." },
+      { title: 'Lancez le profil Fabric', text: "Ouvrez le launcher officiel, sélectionnez le nouveau profil « Fabric » créé automatiquement, puis démarrez le jeu pour vérifier que tout fonctionne.", tip: "💡 Astuce : gardez toujours la version de Fabric API alignée avec la version du jeu pour éviter les plantages au démarrage." }
+    ]
+  },
+  {
+    id: 'forge',
+    icon: '⚒️',
+    category: 'mods',
+    title: 'Installer Forge',
+    desc: "Configurez le chargeur de mods historique, compatible avec la plus large bibliothèque de mods du jeu.",
+    steps: [
+      { title: 'Téléchargez le fichier d\'installation', text: "Rendez-vous sur le site officiel de Forge, choisissez la version correspondant à votre version de Minecraft, puis téléchargez l'installateur." },
+      { title: 'Lancez l\'installateur en mode client', text: "Exécutez le fichier téléchargé, sélectionnez l'option « Install client », vérifiez le chemin d'installation du launcher, puis validez." },
+      { title: 'Vérifiez la création du profil', text: "Ouvrez le launcher officiel : un nouveau profil Forge doit apparaître automatiquement dans la liste des versions disponibles.", list: ['Profil Forge visible dans le launcher', 'Version de Minecraft correspondante', 'Dossier mods créé automatiquement'] },
+      { title: 'Ajoutez vos premiers mods', text: "Placez les fichiers .jar de vos mods compatibles Forge dans le dossier « mods » du profil, puis relancez le jeu pour les activer.", tip: "💡 Astuce : ne mélangez jamais des mods Forge et des mods Fabric dans le même dossier, ils ne sont pas compatibles entre eux." }
+    ]
+  },
+  {
+    id: 'sodium',
+    icon: '⚡',
+    category: 'mods',
+    title: 'Installer Sodium',
+    desc: "Boostez vos performances graphiques grâce à ce mod d'optimisation du rendu compatible Fabric.",
+    steps: [
+      { title: 'Assurez-vous d\'avoir Fabric installé', text: "Sodium fonctionne sur le chargeur Fabric : vérifiez que votre profil Fabric et Fabric API sont déjà en place avant de continuer." },
+      { title: 'Téléchargez Sodium', text: "Récupérez la version de Sodium correspondant à votre version de Minecraft et de Fabric Loader depuis une source fiable." },
+      { title: 'Placez le fichier dans le dossier mods', text: "Copiez le fichier .jar téléchargé dans le dossier « mods » de votre instance Fabric, à côté de Fabric API.", list: ['Fabric API présent', 'Sodium copié dans /mods', 'Versions compatibles entre elles'] },
+      { title: 'Lancez le jeu et ajustez les réglages', text: "Démarrez votre profil Fabric, ouvrez les nouvelles options vidéo apportées par Sodium et ajustez les réglages de rendu selon votre matériel.", tip: "💡 Astuce : combinez Sodium avec un mod de gestion des ressources pour un gain de FPS encore plus marqué." }
+    ]
+  },
+  {
+    id: 'serveur',
+    icon: '🖥️',
+    category: 'serveurs',
+    title: 'Créer un serveur Minecraft',
+    desc: "Montez votre propre serveur vanilla, en local ou sur une machine distante, en quelques étapes simples.",
+    steps: [
+      { title: 'Installez Java sur votre machine', text: "Un serveur Minecraft nécessite une version de Java compatible avec la version du jeu que vous souhaitez héberger. Installez-la avant toute chose." },
+      { title: 'Téléchargez le fichier serveur officiel', text: "Récupérez le fichier .jar du serveur correspondant à la version choisie, et placez-le dans un dossier dédié sur votre machine." },
+      { title: 'Configurez les fichiers de base', text: "Lancez une première fois le serveur pour générer les fichiers de configuration, acceptez l'accord de licence dans eula.txt, puis ajustez server.properties selon vos besoins.", list: ['Accepter l\'EULA', 'Définir le mode de jeu', 'Choisir la difficulté et le nombre de joueurs max'] },
+      { title: 'Démarrez et testez le serveur', text: "Relancez le serveur, attendez qu'il affiche « Done », puis connectez-vous depuis le jeu via l'adresse locale ou l'IP de la machine.", tip: "💡 Astuce : allouez suffisamment de mémoire vive au serveur via les arguments de lancement pour éviter les ralentissements." }
+    ]
+  },
+  {
+    id: 'papermc',
+    icon: '📄',
+    category: 'serveurs',
+    title: 'Installer PaperMC',
+    desc: "Optimisez les performances de votre serveur grâce à ce fork hautement optimisé et compatible plugins.",
+    steps: [
+      { title: 'Téléchargez le build PaperMC', text: "Rendez-vous sur le site officiel du projet, choisissez la version de Minecraft souhaitée et téléchargez le build recommandé le plus récent." },
+      { title: 'Remplacez le fichier serveur', text: "Placez le fichier .jar de PaperMC dans le dossier de votre serveur existant, à la place ou aux côtés du serveur vanilla." },
+      { title: 'Adaptez le script de lancement', text: "Modifiez votre script ou commande de démarrage pour qu'il pointe vers le nouveau fichier .jar de PaperMC.", list: ['Script de lancement mis à jour', 'Mémoire allouée conservée', 'Ancien monde compatible conservé'] },
+      { title: 'Ajustez les fichiers de configuration Paper', text: "Explorez les fichiers paper-world-defaults.yml et paper-global.yml pour affiner les réglages de performance selon votre serveur.", tip: "💡 Astuce : sauvegardez toujours votre monde avant de changer de type de serveur." }
+    ]
+  },
+  {
+    id: 'ports',
+    icon: '🔓',
+    category: 'serveurs',
+    title: 'Ouvrir ses ports',
+    desc: "Rendez votre serveur accessible depuis internet en configurant correctement votre box et votre pare-feu.",
+    steps: [
+      { title: 'Attribuez une IP locale fixe', text: "Sur l'interface d'administration de votre box internet, réservez une adresse IP locale fixe pour la machine qui héberge le serveur." },
+      { title: 'Configurez la redirection de port', text: "Dans les réglages NAT/redirection de port de votre box, ouvrez le port du serveur Minecraft (par défaut le port standard du jeu) et redirigez-le vers l'IP locale de votre machine." },
+      { title: 'Autorisez le port dans le pare-feu', text: "Ajoutez une règle entrante dans le pare-feu de votre système d'exploitation pour autoriser le trafic sur ce port.", list: ['Port ouvert sur la box', 'Règle pare-feu créée', 'IP locale fixe attribuée'] },
+      { title: 'Testez l\'accès depuis l\'extérieur', text: "Utilisez un outil de vérification de port en ligne ou demandez à un ami de se connecter avec votre IP publique pour confirmer que tout fonctionne.", tip: "💡 Astuce : ne partagez jamais votre IP publique publiquement, préférez un nom de domaine ou un service de tunnel." }
+    ]
+  },
+  {
+    id: 'luckperms',
+    icon: '🔐',
+    category: 'plugins',
+    title: 'Installer LuckPerms',
+    desc: "Gérez finement les permissions et les grades de vos joueurs grâce à ce plugin de référence.",
+    steps: [
+      { title: 'Téléchargez le plugin', text: "Récupérez le fichier .jar de LuckPerms correspondant à votre type de serveur (Paper, Spigot ou équivalent Bedrock via un pont de permissions)." },
+      { title: 'Placez-le dans le dossier plugins', text: "Copiez le fichier téléchargé dans le dossier « plugins » de votre serveur, puis redémarrez celui-ci pour générer la configuration." },
+      { title: 'Créez vos groupes de permissions', text: "Utilisez les commandes en jeu ou en console pour créer vos groupes (ex: membre, modérateur, admin) et leur assigner des permissions.", list: ['Groupe « défaut » créé', 'Groupe « modérateur » avec permissions étendues', 'Groupe « admin » avec accès complet'] },
+      { title: 'Attribuez les grades aux joueurs', text: "Ajoutez vos joueurs aux groupes créés via la commande d'attribution de permission, puis vérifiez leur grade en jeu.", tip: "💡 Astuce : utilisez l'interface web éditeur de LuckPerms pour gérer les permissions plus visuellement." }
+    ]
+  },
+  {
+    id: 'essentialsx',
+    icon: '📦',
+    category: 'plugins',
+    title: 'Installer EssentialsX',
+    desc: "Ajoutez les commandes essentielles (téléportation, économie, kits) à votre serveur en un seul plugin.",
+    steps: [
+      { title: 'Téléchargez EssentialsX et ses extensions', text: "Récupérez le plugin principal ainsi que les modules complémentaires utiles comme le chat ou la protection anti-griefing selon vos besoins." },
+      { title: 'Installez les fichiers dans plugins', text: "Placez tous les fichiers .jar téléchargés dans le dossier « plugins », puis redémarrez le serveur pour générer les fichiers de configuration." },
+      { title: 'Configurez l\'économie et les kits', text: "Ouvrez les fichiers de configuration générés pour personnaliser la monnaie virtuelle, les kits de départ et les cooldowns de téléportation.", list: ['Monnaie configurée', 'Kit de bienvenue créé', 'Commandes /home et /warp activées'] },
+      { title: 'Testez les commandes en jeu', text: "Connectez-vous à votre serveur et testez les commandes de base comme /spawn, /home ou /kit pour confirmer le bon fonctionnement.", tip: "💡 Astuce : pensez à limiter certaines commandes aux grades supérieurs via un plugin de permissions." }
+    ]
+  },
+  {
+    id: 'worldedit',
+    icon: '🧱',
+    category: 'plugins',
+    title: 'Installer WorldEdit',
+    desc: "Construisez et modifiez le monde à grande échelle grâce à cet outil incontournable des bâtisseurs.",
+    steps: [
+      { title: 'Téléchargez le plugin', text: "Récupérez la version de WorldEdit compatible avec votre serveur (Paper, Spigot ou Fabric côté client pour l'édition solo)." },
+      { title: 'Installez-le dans plugins', text: "Placez le fichier .jar dans le dossier « plugins » de votre serveur, puis redémarrez celui-ci pour l'activer." },
+      { title: 'Sélectionnez une zone', text: "En jeu, utilisez l'outil de sélection pour définir deux points délimitant la zone à modifier.", list: ['Point A défini', 'Point B défini', 'Zone affichée en jeu'] },
+      { title: 'Appliquez une commande d\'édition', text: "Utilisez une commande comme le remplissage de bloc pour transformer instantanément toute la zone sélectionnée.", tip: "💡 Astuce : limitez la taille des sélections sur un serveur multijoueur pour éviter de surcharger le serveur." }
+    ]
+  },
+  {
+    id: 'optifine',
+    icon: '🎞️',
+    category: 'optimisation',
+    title: 'Optimiser ses FPS avec OptiFine',
+    desc: "Améliorez la fluidité du jeu grâce aux réglages graphiques avancés apportés par ce mod historique.",
+    steps: [
+      { title: 'Téléchargez OptiFine', text: "Récupérez la version correspondant exactement à votre version de Minecraft depuis le site officiel du projet." },
+      { title: 'Installez le mod', text: "Exécutez le fichier téléchargé pour créer automatiquement un profil dédié dans votre launcher officiel." },
+      { title: 'Ajustez les paramètres vidéo', text: "Lancez le profil OptiFine, ouvrez les options vidéo étendues et réduisez les paramètres gourmands.", list: ['Distance de rendu réduite', 'Effets de particules limités', 'Lissage désactivé sur petite config'] },
+      { title: 'Activez les packs de ressources HD', text: "Profitez du support des textures haute définition pour améliorer le rendu visuel sans trop impacter les performances.", tip: "💡 Astuce : le mode « rapide » des nuages et des ombres offre souvent le meilleur compromis visuel/performance." }
+    ]
+  },
+  {
+    id: 'renderdistance',
+    icon: '🌫️',
+    category: 'optimisation',
+    title: 'Réduire la distance de rendu intelligemment',
+    desc: "Trouvez le bon équilibre entre paysages lointains et fluidité en ajustant la distance de rendu.",
+    steps: [
+      { title: 'Ouvrez les options vidéo', text: "Depuis le menu principal ou en jeu, accédez aux paramètres vidéo pour localiser le curseur de distance de rendu." },
+      { title: 'Réduisez progressivement la valeur', text: "Diminuez la distance de rendu par petits paliers et observez l'évolution du compteur de FPS après chaque changement." },
+      { title: 'Ajustez le rendu simulé séparément', text: "Réduisez également la distance de simulation des entités et du monde si votre launcher le permet, pour soulager le processeur.", list: ['Distance de rendu abaissée', 'Distance de simulation ajustée', 'FPS mesurés après chaque étape'] },
+      { title: 'Trouvez votre équilibre idéal', text: "Conservez la valeur la plus haute qui reste fluide pour votre machine, en tenant compte du type de jeu (survie, PvP, exploration).", tip: "💡 Astuce : le mode PvP profite d'une distance de rendu plus faible pour un gain de réactivité, l'exploration préfère une distance plus élevée." }
+    ]
+  },
+  {
+    id: 'bukkit',
+    icon: '🧑\u200d💻',
+    category: 'developpement',
+    title: 'Créer son premier plugin Bukkit',
+    desc: "Découvrez les bases du développement de plugins pour serveurs Java grâce à l'API Bukkit/Spigot.",
+    steps: [
+      { title: 'Préparez votre environnement', text: "Installez un kit de développement Java ainsi qu'un environnement de développement intégré adapté à la programmation Java." },
+      { title: 'Créez le projet et le fichier de description', text: "Mettez en place la structure du projet avec le fichier de description du plugin, indiquant son nom, sa version et sa classe principale.", list: ['Fichier de description créé', 'Classe principale définie', 'Dépendance vers l\'API ajoutée'] },
+      { title: 'Écrivez votre première commande', text: "Créez une classe qui écoute une commande simple et affiche un message au joueur qui l'exécute, pour valider la structure du plugin." },
+      { title: 'Compilez et testez sur un serveur local', text: "Compilez votre plugin en fichier .jar, placez-le dans le dossier plugins d'un serveur de test, puis vérifiez son bon fonctionnement en jeu.", tip: "💡 Astuce : gardez un serveur de test dédié pour ne jamais expérimenter directement sur un serveur en production." }
+    ]
+  },
+  {
+    id: 'devenv',
+    icon: '💻',
+    category: 'developpement',
+    title: 'Configurer un environnement de dev Minecraft',
+    desc: "Mettez en place un poste de travail complet pour développer mods et plugins dans de bonnes conditions.",
+    steps: [
+      { title: 'Installez les outils de base', text: "Installez un kit de développement Java à jour, un gestionnaire de build et un environnement de développement intégré reconnu par la communauté." },
+      { title: 'Configurez le contrôle de version', text: "Initialisez un dépôt pour suivre l'évolution de votre code et faciliter la collaboration ou les retours en arrière.", list: ['Dépôt initialisé', 'Fichier d\'exclusion configuré', 'Premier commit réalisé'] },
+      { title: 'Ajoutez les environnements de mods', text: "Selon votre cible (Fabric ou Forge), ajoutez les environnements de développement officiels qui fournissent les outils de compilation et de test." },
+      { title: 'Lancez un environnement de test', text: "Utilisez les tâches de build fournies pour lancer une instance de jeu de test directement depuis votre environnement de développement.", tip: "💡 Astuce : documentez chaque étape de configuration dans un fichier readme pour pouvoir reproduire l'environnement facilement." }
+    ]
+  }
+];
+
+/* --------------------------- 2. RENDU DES CARTES --------------------------- */
+const grid = document.getElementById('grid');
+const noResults = document.getElementById('noResults');
+
+function renderCards(list){
+  grid.innerHTML = '';
+  if(list.length === 0){
+    noResults.classList.add('show');
+  } else {
+    noResults.classList.remove('show');
+  }
+  list.forEach((tuto, i) => {
+    const card = document.createElement('article');
+    card.className = 'card reveal';
+    card.dataset.category = tuto.category;
+    card.dataset.id = tuto.id;
+    card.style.transitionDelay = (i % 6) * 0.05 + 's';
+    card.innerHTML = `
+      <div class="card-icon">${tuto.icon}</div>
+      <div class="card-cat">${CATEGORY_LABELS[tuto.category]}</div>
+      <h3>${tuto.title}</h3>
+      <p>${tuto.desc}</p>
+      <div class="card-footer">
+        <button class="card-btn" data-open="${tuto.id}">Lire le tutoriel →</button>
+        <span class="card-steps-count">${tuto.steps.length} étapes</span>
+      </div>
+    `;
+    grid.appendChild(card);
+    requestAnimationFrame(() => observeReveal(card));
+
+    // halo suivant la souris sur la carte
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - rect.top) + 'px');
+    });
+  });
+
+  // ouverture des modales
+  grid.querySelectorAll('[data-open]').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.dataset.open));
+  });
+  grid.querySelectorAll('.card').forEach(c => {
+    c.addEventListener('click', (e) => {
+      if(e.target.closest('[data-open]')) return;
+      openModal(c.dataset.id);
+    });
+  });
+}
+
+/* --------------------------- 3. RECHERCHE + FILTRES --------------------------- */
+let currentFilter = 'all';
+let currentSearch = '';
+
+function applyFilters(){
+  let list = TUTORIALS.filter(t => currentFilter === 'all' || t.category === currentFilter);
+  if(currentSearch.trim() !== ''){
+    const q = currentSearch.toLowerCase();
+    list = list.filter(t =>
+      t.title.toLowerCase().includes(q) ||
+      t.desc.toLowerCase().includes(q) ||
+      CATEGORY_LABELS[t.category].toLowerCase().includes(q)
+    );
+  }
+  renderCards(list);
+  document.getElementById('searchCountBadge').textContent = list.length + (list.length > 1 ? ' résultats' : ' résultat');
+}
+
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+
+searchInput.addEventListener('input', () => {
+  currentSearch = searchInput.value;
+  searchClear.classList.toggle('show', currentSearch.length > 0);
+  searchInput.parentElement.style.transform = 'translateY(-2px) scale(1.005)';
+  clearTimeout(window.__searchBounce);
+  window.__searchBounce = setTimeout(() => { searchInput.parentElement.style.transform = ''; }, 180);
+  applyFilters();
+});
+
+searchClear.addEventListener('click', () => {
+  searchInput.value = '';
+  currentSearch = '';
+  searchClear.classList.remove('show');
+  applyFilters();
+  searchInput.focus();
+});
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    currentFilter = chip.dataset.filter;
+    applyFilters();
+  });
+});
+
+// liens du footer -> filtre direct
+document.querySelectorAll('[data-jump]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const cat = link.dataset.jump;
+    const chip = document.querySelector(`.filter-chip[data-filter="${cat}"]`);
+    if(chip) chip.click();
+    document.getElementById('tutoriels').scrollIntoView({ behavior:'smooth' });
+  });
+});
+
+/* --------------------------- 4. MODALE --------------------------- */
+const modalOverlay = document.getElementById('modalOverlay');
+const modalIcon = document.getElementById('modalIcon');
+const modalCat = document.getElementById('modalCat');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const modalDots = document.getElementById('modalDots');
+const xpFill = document.getElementById('xpFill');
+const stepCurrent = document.getElementById('stepCurrent');
+const stepTotal = document.getElementById('stepTotal');
+const stepPercent = document.getElementById('stepPercent');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+let activeTuto = null;
+let activeStep = 0;
+
+function openModal(id){
+  activeTuto = TUTORIALS.find(t => t.id === id);
+  if(!activeTuto) return;
+  activeStep = 0;
+  modalIcon.textContent = activeTuto.icon;
+  modalCat.textContent = CATEGORY_LABELS[activeTuto.category];
+  modalTitle.textContent = activeTuto.title;
+  stepTotal.textContent = activeTuto.steps.length;
+
+  modalBody.innerHTML = activeTuto.steps.map((s, i) => `
+    <div class="step ${i===0 ? 'active' : ''}" data-step="${i}">
+      <h4>${i+1}. ${s.title}</h4>
+      <p>${s.text}</p>
+      ${s.list ? `<ul>${s.list.map(li => `<li>${li}</li>`).join('')}</ul>` : ''}
+      ${s.tip ? `<div class="tip">${s.tip}</div>` : ''}
+    </div>
+  `).join('');
+
+  modalDots.innerHTML = activeTuto.steps.map((_, i) => `<span class="${i===0 ? 'active' : ''}"></span>`).join('');
+
+  updateProgress();
+  modalOverlay.classList.add('open');
+  document.body.classList.add('no-scroll');
+}
+
+function closeModal(){
+  modalOverlay.classList.remove('open');
+  document.body.classList.remove('no-scroll');
+}
+
+function updateProgress(){
+  const total = activeTuto.steps.length;
+  const pct = Math.round(((activeStep + 1) / total) * 100);
+  xpFill.style.width = pct + '%';
+  stepCurrent.textContent = activeStep + 1;
+  stepPercent.textContent = pct + '%';
+  prevBtn.disabled = activeStep === 0;
+  nextBtn.textContent = activeStep === total - 1 ? 'Terminer ✓' : 'Suivant →';
+
+  modalBody.querySelectorAll('.step').forEach((el, i) => el.classList.toggle('active', i === activeStep));
+  modalDots.querySelectorAll('span').forEach((el, i) => el.classList.toggle('active', i === activeStep));
+}
+
+prevBtn.addEventListener('click', () => {
+  if(activeStep > 0){ activeStep--; updateProgress(); }
+});
+nextBtn.addEventListener('click', () => {
+  if(activeStep < activeTuto.steps.length - 1){
+    activeStep++;
+    updateProgress();
+  } else {
+    closeModal();
+    showToast(`✅ Tutoriel « ${activeTuto.title} » terminé !`);
+  }
+});
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', (e) => {
+  if(!modalOverlay.classList.contains('open')) return;
+  if(e.key === 'Escape') closeModal();
+  if(e.key === 'ArrowRight') nextBtn.click();
+  if(e.key === 'ArrowLeft') prevBtn.click();
+});
+
+/* --------------------------- 5. FOND ANIMÉ : BULLES, HALO, PARALLAXE --------------------------- */
+const bubblesContainer = document.getElementById('bubbles');
+function createBubbles(count){
+  for(let i = 0; i < count; i++){
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 14 + Math.random() * 60;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = Math.random() * 100 + 'vw';
+    b.style.animationDuration = (14 + Math.random() * 16) + 's';
+    b.style.animationDelay = (Math.random() * -20) + 's';
+    bubblesContainer.appendChild(b);
+  }
+}
+createBubbles(24);
+
+const cursorHalo = document.getElementById('cursorHalo');
+let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+let haloX = mouseX, haloY = mouseY;
+window.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX; mouseY = e.clientY;
+});
+function animateHalo(){
+  haloX += (mouseX - haloX) * 0.08;
+  haloY += (mouseY - haloY) * 0.08;
+  cursorHalo.style.transform = `translate(${haloX}px, ${haloY}px) translate(-50%, -50%)`;
+  requestAnimationFrame(animateHalo);
+}
+animateHalo();
+
+// parallaxe léger sur le halo du hero
+const glowOrb = document.querySelector('.hero-glow-orb');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if(glowOrb) glowOrb.style.transform = `translateX(-50%) translateY(${y * 0.25}px)`;
+});
+
+/* --------------------------- 6. COMPTEURS, SCROLL REVEAL, BACK-TO-TOP --------------------------- */
+// Titre du hero animé mot par mot
+const heroTitle = document.getElementById('heroTitle');
+const words = ['🎮', 'Mine', '<span class="accent">Tutorials</span>'];
+heroTitle.innerHTML = words.map((w, i) => `<span class="hero-title-word" style="animation-delay:${i*0.12+0.1}s">${w}&nbsp;</span>`).join('');
+
+// Compteurs animés (hero stats)
+function animateCounters(){
+  document.querySelectorAll('.hero-stat .num').forEach(el => {
+    const target = parseInt(el.dataset.count, 10);
+    let current = 0;
+    const duration = 1400;
+    const stepTime = 16;
+    const steps = duration / stepTime;
+    const increment = target / steps;
+    const tick = () => {
+      current += increment;
+      if(current >= target){
+        el.textContent = target;
+      } else {
+        el.textContent = Math.floor(current);
+        requestAnimationFrame_delay(tick, stepTime);
+      }
+    };
+    tick();
+  });
+}
+function requestAnimationFrame_delay(fn, delay){ setTimeout(fn, delay); }
+
+// IntersectionObserver générique pour le "reveal" au scroll
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+function observeReveal(el){ revealObserver.observe(el); }
+document.querySelectorAll('.reveal').forEach(el => observeReveal(el));
+
+// Déclenche l'animation des compteurs quand le bloc hero-stats est visible
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      animateCounters();
+      statsObserver.disconnect();
+    }
+  });
+}, { threshold: 0.4 });
+statsObserver.observe(document.querySelector('.hero-stats'));
+
+// Navbar : effet au scroll
+const navbar = document.getElementById('navbar');
+const toTopBtn = document.getElementById('toTop');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  navbar.classList.toggle('scrolled', y > 40);
+  toTopBtn.classList.toggle('show', y > 600);
+});
+toTopBtn.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+/* --------------------------- 7. NOTIFICATIONS TOAST --------------------------- */
+const toastContainer = document.getElementById('toastContainer');
+function showToast(message){
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span class="dot"></span><span>${message}</span>`;
+  toastContainer.appendChild(toast);
+  setTimeout(() => toast.remove(), 3700);
+}
+
+/* --------------------------- 8. LOADER & INITIALISATION --------------------------- */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+    showToast('👋 Bienvenue sur MineTutorials !');
+  }, 900);
+});
+
+// Rendu initial des cartes
+applyFilters();
+
+// Message de bienvenue si le mode sombre système est actif (le site est déjà en thème sombre par défaut,
+// cette détection permet simplement d'informer l'utilisateur — mode sombre auto respecté nativement).
+if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){
+  document.documentElement.setAttribute('data-theme', 'dark');
+}
+</script>
+</body>
+</html>
